@@ -1,0 +1,75 @@
+/* 模版用于匹配导出的CSharp脚本工具 */
+using LitJson;
+using System.IO;
+using System.Collections.Generic;
+
+namespace GameFrameWork.Config
+{{
+    public sealed class {0}CfgItem
+    {{
+        {1}
+    }}
+
+    public class {0}CfgCtrl
+    {{
+        Dictionary<int, {0}CfgItem> mConfigDic;
+        protected {0}CfgCtrl()
+        {{
+            mConfigDic = new Dictionary<int, {0}CfgItem>();
+			if (mConfigDic.Count == 0)
+            {{
+                string mPathJson = @"Assets\_Config\JsonData\";
+                using (StreamReader sr = new StreamReader(mPathJson + GetAssetName()))
+                {{
+                    LoadConfig(sr.ReadToEnd());
+                }}
+
+            }}
+        }}
+
+        class SingletonCreator
+        {{
+            static SingletonCreator() {{ }}
+            internal static readonly {0}CfgCtrl instance = new {0}CfgCtrl();
+        }}
+
+        public static {0}CfgCtrl Instance
+        {{
+            get {{ return SingletonCreator.instance; }}
+        }}
+		
+		public static {0}CfgItem TryGet(int id)
+        {{
+            return Instance.Get(id);
+        }}
+
+        public string GetAssetName()
+        {{
+        	return "{0}.json";
+        }}
+
+        public Dictionary<int, {0}CfgItem> All
+        {{
+            get {{ return mConfigDic; }}
+        }}
+
+        public void LoadConfig(string content)
+        {{
+            mConfigDic.Clear();
+            JsonData data = JsonMapper.ToObject(content);
+            for (int i = 0; i < data.Count; ++i)
+            {{
+                var obj = JsonMapper.ToObject<{0}CfgItem>(data[i].ToJson());
+                if (obj != null)
+                    mConfigDic.Add(obj.id, obj);
+            }}
+        }}
+
+        public {0}CfgItem Get(int id)
+        {{
+            if (mConfigDic.ContainsKey(id))
+                return mConfigDic[id];
+            return null;
+        }}
+    }}
+}}
